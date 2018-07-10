@@ -71,7 +71,7 @@ class MakeNFe extends BaseMake
     private $compra = ''; //DOMNode
     private $cana = ''; //DOMNode
     // Arrays
-    private $aTotICMSUFDest = array('vFCPUFDest' => 0, 'vICMSUFDest' => 0, 'vICMSUFRemet' => 0);
+    private $aTotICMSUFDest = array('pFCPUFDest' => 0, 'vFCPUFDest' => 0, 'vICMSUFDest' => 0, 'vICMSUFRemet' => 0,);
     private $aNFref = array(); //array de DOMNode
     private $aDup = array(); //array de DOMNodes
     private $aPag = array(); //array de DOMNodes
@@ -1989,6 +1989,8 @@ class MakeNFe extends BaseMake
      * @param  string $vBC
      * @param  string $pICMS
      * @param  string $vICMS
+     * @param  string $pFCP
+     * @param  string $vFCP
      * @param  string $vICMSDeson
      * @param  string $motDesICMS
      * @param  string $modBCST
@@ -2013,6 +2015,8 @@ class MakeNFe extends BaseMake
         $vBC = '',
         $pICMS = '',
         $vICMS = '',
+        $pFCP = '',
+        $vFCP = '',
         $vICMSDeson = '',
         $motDesICMS = '',
         $modBCST = '',
@@ -2037,6 +2041,12 @@ class MakeNFe extends BaseMake
                 $this->dom->addChild($icms, 'vBC', $vBC, true, "$identificador [item $nItem] Valor da BC do ICMS");
                 $this->dom->addChild($icms, 'pICMS', $pICMS, true, "$identificador [item $nItem] Alíquota do imposto");
                 $this->dom->addChild($icms, 'vICMS', $vICMS, true, "$identificador [item $nItem] Valor do ICMS");
+                if (isset($this->aTotICMSUFDest['pFCPUFDest'])) {
+                    $this->dom->addChild($icms, 'pFCP', $pFCP, false, "$identificador [item $nItem] Percentual do Fundo de Combate à Pobreza (FCP)");
+                }
+                if (isset($this->aTotICMSUFDest['vFCPUFDest'])) {
+                    $this->dom->addChild($icms, 'vFCP', $vFCP, false, "$identificador [item $nItem] Valor do Fundo de Combate à Pobreza (FCP)");
+                }
                 break;
             case '10':
                 $icms = $this->dom->createElement("ICMS10");
@@ -2068,6 +2078,15 @@ class MakeNFe extends BaseMake
                 $this->dom->addChild($icms, 'vBC', $vBC, true, "$identificador [item $nItem] Valor da BC do ICMS");
                 $this->dom->addChild($icms, 'pICMS', $pICMS, true, "$identificador [item $nItem] Alíquota do imposto");
                 $this->dom->addChild($icms, 'vICMS', $vICMS, true, "$identificador [item $nItem] Valor do ICMS");
+                if (isset($this->aTotICMSUFDest['pFCPUFDest'])) {
+                    $this->dom->addChild($icms, 'vBCFCP', $vBC, false, "$identificador [item $nItem] Base de Cálculo do Fundo de Combate à Pobreza (FCP)");
+                }
+                if (isset($this->aTotICMSUFDest['pFCPUFDest'])) {
+                    $this->dom->addChild($icms, 'pFCP', $pFCP, false, "$identificador [item $nItem] Percentual do Fundo de Combate à Pobreza (FCP)");
+                }
+                if (isset($this->aTotICMSUFDest['vFCPUFDest'])) {
+                    $this->dom->addChild($icms, 'vFCP', $vFCP, false, "$identificador [item $nItem] Valor do Fundo de Combate à Pobreza (FCP)");
+                }
                 $this->dom->addChild($icms, 'vICMSDeson', $vICMSDeson, false, "$identificador [item $nItem] Valor do ICMS desonerado");
                 $this->dom->addChild($icms, 'motDesICMS', $motDesICMS, false, "$identificador [item $nItem] Motivo da desoneração do ICMS");
                 break;
@@ -2600,6 +2619,7 @@ class MakeNFe extends BaseMake
         );
         $this->aICMSUFDest[$nItem] = $icmsUFDest;
         $this->aTotICMSUFDest['vICMSUFDest'] += $vICMSUFDest;
+        $this->aTotICMSUFDest['pFCPUFDest'] += $pFCPUFDest;
         $this->aTotICMSUFDest['vFCPUFDest'] += $vFCPUFDest;
         $this->aTotICMSUFDest['vICMSUFRemet'] += $vICMSUFRemet;
         return $icmsUFDest;
@@ -3061,6 +3081,7 @@ class MakeNFe extends BaseMake
     public function tagICMSTot(
         $vBC = '',
         $vICMS = '',
+        $vFCP = '',
         $vICMSDeson = '',
         $vBCST = '',
         $vST = '',
@@ -3081,9 +3102,10 @@ class MakeNFe extends BaseMake
         $this->dom->addChild($ICMSTot, "vBC", $vBC, true, "Base de Cálculo do ICMS");
         $this->dom->addChild($ICMSTot, "vICMS", $vICMS, true, "Valor Total do ICMS");
         $this->dom->addChild($ICMSTot, "vICMSDeson", $vICMSDeson, true, "Valor Total do ICMS desonerado");
-        $this->dom->addChild($ICMSTot, "vFCP", $this->aTotICMSUFDest['vFCPUFDest'], false, "Valor total do ICMS relativo ao Fundo de Combate à Pobreza(FCP) para a UF de destino");
-        //$this->dom->addChild($ICMSTot, "vICMSUFDest", $this->aTotICMSUFDest['vICMSUFDest'], false, "Valor total do ICMS de partilha para a UF do destinatário");
-        //$this->dom->addChild($ICMSTot, "vICMSUFRemet", $this->aTotICMSUFDest['vICMSUFRemet'], false, "Valor total do ICMS de partilha para a UF do remetente");
+        $this->dom->addChild($ICMSTot, "vFCP", $vFCP, false, "Valor total do ICMS relativo ao Fundo de Combate à Pobreza(FCP) para a UF de destino");
+        $this->dom->addChild($ICMSTot, "vFCPUFDest", $this->aTotICMSUFDest['vFCPUFDest'], false, "Valor total Fundo de Combate à Pobreza(FCP) para a UF do destinatário");
+        $this->dom->addChild($ICMSTot, "vICMSUFDest", $this->aTotICMSUFDest['vICMSUFDest'], false, "Valor total do ICMS de partilha para a UF do destinatário");
+        $this->dom->addChild($ICMSTot, "vICMSUFRemet", $this->aTotICMSUFDest['vICMSUFRemet'], false, "Valor total do ICMS de partilha para a UF do remetente");
         $this->dom->addChild($ICMSTot, "vBCST", $vBCST, true, "Base de Cálculo do ICMS ST");
         $this->dom->addChild($ICMSTot, "vST", $vST, true, "Valor Total do ICMS ST");
         $this->dom->addChild($ICMSTot, "vFCPST", isset($this->aTotICMSUFDest['vFCPST']) ? $this->aTotICMSUFDest['vFCPST'] : "0.00", false, "Valor total do ICMS relativo ao Fundo de Combate à Pobreza(FCP) ST para a UF de destino");
