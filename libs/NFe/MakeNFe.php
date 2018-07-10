@@ -28,6 +28,7 @@ use NFePHP\Common\Base\BaseMake;
 use NFePHP\Common\Exception\RuntimeException;
 use \DOMDocument;
 use \DOMElement;
+use stdClass;
 
 class MakeNFe extends BaseMake
 {
@@ -277,13 +278,14 @@ class MakeNFe extends BaseMake
             true,
             $identificador . "Descrição da Natureza da Operaçãoo"
         );
-        $this->dom->addChild(
+        // Removido
+        /*$this->dom->addChild(
             $ide,
             "indPag",
             $indPag,
             true,
             $identificador . "Indicador da forma de pagamento"
-        );
+        );*/
         $this->dom->addChild(
             $ide,
             "mod",
@@ -3080,17 +3082,19 @@ class MakeNFe extends BaseMake
         $this->dom->addChild($ICMSTot, "vICMS", $vICMS, true, "Valor Total do ICMS");
         $this->dom->addChild($ICMSTot, "vICMSDeson", $vICMSDeson, true, "Valor Total do ICMS desonerado");
         $this->dom->addChild($ICMSTot, "vFCP", $this->aTotICMSUFDest['vFCPUFDest'], false, "Valor total do ICMS relativo ao Fundo de Combate à Pobreza(FCP) para a UF de destino");
-        $this->dom->addChild($ICMSTot, "vFCPST", $this->aTotICMSUFDest['vFCPST'], false, "Valor total do ICMS relativo ao Fundo de Combate à Pobreza(FCP) ST para a UF de destino");
         //$this->dom->addChild($ICMSTot, "vICMSUFDest", $this->aTotICMSUFDest['vICMSUFDest'], false, "Valor total do ICMS de partilha para a UF do destinatário");
         //$this->dom->addChild($ICMSTot, "vICMSUFRemet", $this->aTotICMSUFDest['vICMSUFRemet'], false, "Valor total do ICMS de partilha para a UF do remetente");
         $this->dom->addChild($ICMSTot, "vBCST", $vBCST, true, "Base de Cálculo do ICMS ST");
         $this->dom->addChild($ICMSTot, "vST", $vST, true, "Valor Total do ICMS ST");
+        $this->dom->addChild($ICMSTot, "vFCPST", isset($this->aTotICMSUFDest['vFCPST']) ? $this->aTotICMSUFDest['vFCPST'] : "0.00", false, "Valor total do ICMS relativo ao Fundo de Combate à Pobreza(FCP) ST para a UF de destino");
+        $this->dom->addChild($ICMSTot, "vFCPSTRet", isset($this->aTotICMSUFDest['vFCPSTRet']) ? $this->aTotICMSUFDest['vFCPSTRet'] : "0.00", false, "Valor total do ICMS relativo ao Fundo de Combate à Pobreza(FCP) ST para a UF de destino");
         $this->dom->addChild($ICMSTot, "vProd", $vProd, true, "Valor Total dos produtos e serviços");
         $this->dom->addChild($ICMSTot, "vFrete", $vFrete, true, "Valor Total do Frete");
         $this->dom->addChild($ICMSTot, "vSeg", $vSeg, true, "Valor Total do Seguro");
         $this->dom->addChild($ICMSTot, "vDesc", $vDesc, true, "Valor Total do Desconto");
         $this->dom->addChild($ICMSTot, "vII", $vII, true, "Valor Total do II");
         $this->dom->addChild($ICMSTot, "vIPI", $vIPI, true, "Valor Total do IPI");
+        $this->dom->addChild($ICMSTot, "vIPIDevol", "0.00", true, "Valor Total do IPI Devol");
         $this->dom->addChild($ICMSTot, "vPIS", $vPIS, true, "Valor do PIS");
         $this->dom->addChild($ICMSTot, "vCOFINS", $vCOFINS, true, "Valor da COFINS");
         $this->dom->addChild($ICMSTot, "vOutro", $vOutro, true, "Outras Despesas acessórias");
@@ -3564,24 +3568,83 @@ class MakeNFe extends BaseMake
     }
     
     /**
-     * tagpag
-     * Grupo de Formas de Pagamento YA01 pai A01
-     * tag NFe/infNFe/pag (opcional)
-     * Apenas para o modelo 65 NFCe
-     *
-     * @param  string $tPag
-     * @param  string $vPag
+     * Grupo Pagamento Y pai A01
+     * NOTA: Ajustado para NT2016_002_v1.30
+     * tag NFe/infNFe/pag (obrigatorio na NT2016_002_v1.30)
+     * Obrigatório para 55 e 65
+     * @param stdClass $std
      * @return DOMElement
      */
-    public function tagpag(
-        $tPag = '',
-        $vPag = ''
-    ) {
-        $num = $this->zTagPag();
+    public function tagpag($std)
+    {
         $pag = $this->dom->createElement("pag");
-        $this->dom->addChild($this->aPag[$num-1], "tPag", $tPag, true, "Forma de pagamento");
-        $this->dom->addChild($this->aPag[$num-1], "vPag", $vPag, true, "Valor do Pagamento");
-        return $pag;
+        //incluso no layout 4.00
+        $vTroco = !empty($std->vTroco) ? $std->vTroco : null;
+        $this->dom->addChild(
+            $pag,
+            "vTroco",
+            $vTroco,
+            false,
+            "Valor do troco"
+        );
+        return $this->aPag[] = $pag;
+    }
+    
+    /**
+     * Grupo de Formas de Pagamento YA01a pai YA01
+     * NOTA: Ajuste NT_2016_002_v1.30
+     * NOTA: Ajuste NT_2016_002_v1 51
+     * tag NFe/infNFe/pag/detPag
+     * @param stdClass $std
+     * @return DOMElement
+     */
+    public function tagdetPag($std)
+    {
+        $possible = [
+            'indPag',
+            'tPag',
+            'vPag',
+            'CNPJ',
+            'tBand',
+            'cAut',
+            'tpIntegra'
+        ];
+        $std = $this->equilizeParameters($std, $possible);
+        //padrão para layout 4.00
+        $detPag = $this->dom->createElement("detPag");
+        $this->dom->addChild(
+                $detPag, "indPag", !is_null($std->indPag) ? $std->indPag : null, false, "Indicador da Forma de Pagamento"
+        );
+        $this->dom->addChild(
+                $detPag, "tPag", $std->tPag, true, "Forma de pagamento"
+        );
+        $this->dom->addChild(
+                $detPag, "vPag", $std->vPag, true, "Valor do Pagamento"
+        );
+        if (!empty($std->tpIntegra)) {
+            $card = $this->dom->createElement("card");
+            $this->dom->addChild(
+                    $card, "tpIntegra", $std->tpIntegra, true, "Tipo de Integração para pagamento"
+            );
+            $this->dom->addChild(
+                    $card, "CNPJ", !empty($std->CNPJ) ? $std->CNPJ : null, false, "CNPJ da Credenciadora de cartão de crédito e/ou débito"
+            );
+            $this->dom->addChild(
+                    $card, "tBand", !empty($std->tBand) ? $std->tBand : null, false, "Bandeira da operadora de cartão de crédito e/ou débito"
+            );
+            $this->dom->addChild(
+                    $card, "cAut", !empty($std->cAut) ? $std->cAut : null, false, "Número de autorização da operação cartão de crédito e/ou débito"
+            );
+            $this->dom->appChild($detPag, $card, "Inclusão do node Card");
+        }
+        $n = count($this->aPag);
+        $node = $this->aPag[$n - 1]->getElementsByTagName("vTroco")->item(0);
+        if (!empty($node)) {
+            $this->aPag[$n - 1]->insertBefore($detPag, $node);
+        } else {
+            $this->dom->appChild($this->aPag[$n - 1], $detPag, 'Falta tag "Pag"');
+        }
+        return $detPag;
     }
     
     /**
@@ -4265,4 +4328,22 @@ class MakeNFe extends BaseMake
             $this->chNFe = $chaveMontada;
         }
     }
+    
+    /**
+     * Includes missing or unsupported properties in stdClass
+     * @param stdClass $std
+     * @param array $possible
+     * @return stdClass
+     */
+    protected function equilizeParameters(stdClass $std, $possible)
+    {
+        $arr = get_object_vars($std);
+        foreach ($possible as $key) {
+            if (!array_key_exists($key, $arr)) {
+                $std->$key = null;
+            }
+        }
+        return $std;
+    }
+    
 }
