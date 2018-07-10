@@ -2041,10 +2041,10 @@ class MakeNFe extends BaseMake
                 $this->dom->addChild($icms, 'vBC', $vBC, true, "$identificador [item $nItem] Valor da BC do ICMS");
                 $this->dom->addChild($icms, 'pICMS', $pICMS, true, "$identificador [item $nItem] Alíquota do imposto");
                 $this->dom->addChild($icms, 'vICMS', $vICMS, true, "$identificador [item $nItem] Valor do ICMS");
-                if (isset($this->aTotICMSUFDest['pFCPUFDest'])) {
+                if (!empty($pFCP)) {
                     $this->dom->addChild($icms, 'pFCP', $pFCP, false, "$identificador [item $nItem] Percentual do Fundo de Combate à Pobreza (FCP)");
                 }
-                if (isset($this->aTotICMSUFDest['vFCPUFDest'])) {
+                if (!empty($vFCP)) {
                     $this->dom->addChild($icms, 'vFCP', $vFCP, false, "$identificador [item $nItem] Valor do Fundo de Combate à Pobreza (FCP)");
                 }
                 break;
@@ -2540,6 +2540,7 @@ class MakeNFe extends BaseMake
      *
      * @param  string $nItem
      * @param  string $vBCUFDest
+     * @param  string $vBCFCPUFDest
      * @param  string $pFCPUFDest
      * @param  string $pICMSUFDest
      * @param  string $pICMSInter
@@ -2552,6 +2553,7 @@ class MakeNFe extends BaseMake
     public function tagICMSUFDest(
         $nItem = '',
         $vBCUFDest = '',
+        $vBCFCPUFDest = '',
         $pFCPUFDest = '',
         $pICMSUFDest = '',
         $pICMSInter = '',
@@ -2567,6 +2569,13 @@ class MakeNFe extends BaseMake
             $vBCUFDest,
             true,
             "[item $nItem] Valor da BC do ICMS na UF do destinatário"
+        );
+        $this->dom->addChild(
+            $icmsUFDest,
+            "vBCFCPUFDest",
+            $vBCFCPUFDest,
+            true,
+            "[item $nItem] Valor da BC do FCP na UF do destinatário"
         );
         $this->dom->addChild(
             $icmsUFDest,
@@ -3102,10 +3111,10 @@ class MakeNFe extends BaseMake
         $this->dom->addChild($ICMSTot, "vBC", $vBC, true, "Base de Cálculo do ICMS");
         $this->dom->addChild($ICMSTot, "vICMS", $vICMS, true, "Valor Total do ICMS");
         $this->dom->addChild($ICMSTot, "vICMSDeson", $vICMSDeson, true, "Valor Total do ICMS desonerado");
-        $this->dom->addChild($ICMSTot, "vFCP", $vFCP, false, "Valor total do ICMS relativo ao Fundo de Combate à Pobreza(FCP) para a UF de destino");
         $this->dom->addChild($ICMSTot, "vFCPUFDest", $this->aTotICMSUFDest['vFCPUFDest'], false, "Valor total Fundo de Combate à Pobreza(FCP) para a UF do destinatário");
         $this->dom->addChild($ICMSTot, "vICMSUFDest", $this->aTotICMSUFDest['vICMSUFDest'], false, "Valor total do ICMS de partilha para a UF do destinatário");
         $this->dom->addChild($ICMSTot, "vICMSUFRemet", $this->aTotICMSUFDest['vICMSUFRemet'], false, "Valor total do ICMS de partilha para a UF do remetente");
+        $this->dom->addChild($ICMSTot, "vFCP", $vFCP, false, "Valor total do ICMS relativo ao Fundo de Combate à Pobreza(FCP) para a UF de destino");
         $this->dom->addChild($ICMSTot, "vBCST", $vBCST, true, "Base de Cálculo do ICMS ST");
         $this->dom->addChild($ICMSTot, "vST", $vST, true, "Valor Total do ICMS ST");
         $this->dom->addChild($ICMSTot, "vFCPST", isset($this->aTotICMSUFDest['vFCPST']) ? $this->aTotICMSUFDest['vFCPST'] : "0.00", false, "Valor total do ICMS relativo ao Fundo de Combate à Pobreza(FCP) ST para a UF de destino");
@@ -3641,7 +3650,7 @@ class MakeNFe extends BaseMake
                 $detPag, "tPag", $std->tPag, true, "Forma de pagamento"
         );
         $this->dom->addChild(
-                $detPag, "vPag", $std->vPag, true, "Valor do Pagamento"
+            $detPag, "vPag", $std->vPag, true, "Valor do Pagamento"
         );
         if (!empty($std->tpIntegra)) {
             $card = $this->dom->createElement("card");
