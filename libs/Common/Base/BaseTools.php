@@ -492,7 +492,7 @@ class BaseTools
         } else {
             $aURL = self::zLoadSEFAZ($pathXmlUrlFile, $tpAmb, $siglaUF, $tipo);
         }
-        
+
         //recuperação da versão
         $this->urlVersion = $aURL[$service]['version'];
         //recuperação da url do serviço
@@ -621,7 +621,7 @@ class BaseTools
             'MT'=>'MT',
             'PA'=>'SVRS',
             'PB'=>'SVRS',
-            'PE'=>'PE',
+            'PE'=>'SVRS',
             'PI'=>'SVRS',
             'PR'=>'PR',
             'RJ'=>'SVRS',
