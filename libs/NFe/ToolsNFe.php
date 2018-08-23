@@ -445,7 +445,15 @@ class ToolsNFe extends BaseTools
         $procXML = '';
         //carrega a NFe
         $docnfe = new Dom();
-        $docnfe->loadXMLFile($pathNFefile);
+        
+        if (file_exists($pathNFefile)) {
+            //carrega o XML pelo caminho do arquivo informado
+            $docnfe->loadXMLFile($pathNFefile);
+        } else {
+            //carrega o XML pelo conteúdo
+            $docnfe->loadXMLString($pathNFefile);
+        }
+        
         $nodenfe = $docnfe->getNode('NFe', 0);
         if ($nodenfe == '') {
             $msg = "O arquivo indicado como NFe não é um xml de NFe!";
