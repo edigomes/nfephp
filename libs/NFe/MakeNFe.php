@@ -2015,6 +2015,7 @@ class MakeNFe extends BaseMake
         $vBC = '',
         $pICMS = '',
         $vICMS = '',
+        $vBCFCP = '',
         $pFCP = '',
         $vFCP = '',
         $vICMSDeson = '',
@@ -2079,7 +2080,7 @@ class MakeNFe extends BaseMake
                 $this->dom->addChild($icms, 'pICMS', $pICMS, true, "$identificador [item $nItem] Alíquota do imposto");
                 $this->dom->addChild($icms, 'vICMS', $vICMS, true, "$identificador [item $nItem] Valor do ICMS");
                 if (isset($this->aTotICMSUFDest['pFCPUFDest'])) {
-                    $this->dom->addChild($icms, 'vBCFCP', $vBC, false, "$identificador [item $nItem] Base de Cálculo do Fundo de Combate à Pobreza (FCP)");
+                    $this->dom->addChild($icms, 'vBCFCP', $vBCFCP, false, "$identificador [item $nItem] Base de Cálculo do Fundo de Combate à Pobreza (FCP)");
                 }
                 if (isset($this->aTotICMSUFDest['pFCPUFDest'])) {
                     $this->dom->addChild($icms, 'pFCP', $pFCP, false, "$identificador [item $nItem] Percentual do Fundo de Combate à Pobreza (FCP)");
