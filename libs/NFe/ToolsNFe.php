@@ -596,8 +596,9 @@ class ToolsNFe extends BaseTools
         $signedInfo  = $dom->getNode('SignedInfo');
         $chNFe = $dom->getChave('infNFe');
         $cUF = $dom->getValue($ide, 'cUF');
-        $tpAmb = $dom->getValue($ide, 'tpAmb');
-        $dhEmi = $dom->getValue($ide, 'dhEmi');
+        $tpAmb = $ide->getElementsByTagName('tpAmb')->item(0)->nodeValue;
+        $dhEmi = $ide->getElementsByTagName('dhEmi')->item(0)->nodeValue;
+        $tpEmis = $ide->getElementsByTagName('tpEmis')->item(0)->nodeValue;
         $cDest = '';
         if (!empty($dest)) {
             //pode ser CNPJ , CPF ou idEstrageiro
@@ -614,7 +615,7 @@ class ToolsNFe extends BaseTools
         $digVal = $dom->getValue($signedInfo, 'DigestValue');
         $token = $this->aConfig['tokenNFCe'];
         $idToken = $this->aConfig['tokenNFCeId'];
-        $versao = '100';
+        $versao = '200';
         /*
          *Pega a URL para consulta do QRCode do estado emissor,
          *essa url está em nfe_ws3_mode65.xml, em tese essa url
@@ -640,7 +641,7 @@ class ToolsNFe extends BaseTools
         }
         $url = $this->urlService;
         //usa a função zMakeQRCode para gerar a string da URI
-        $qrcode = $this->zMakeQRCode(
+        /*$qrcode = $this->zMakeQRCode(
             $chNFe,
             $url,
             $tpAmb,
@@ -652,13 +653,29 @@ class ToolsNFe extends BaseTools
             $cDest,
             $idToken,
             $versao
+        );*/
+        $qrcode = self::get200(
+            $chNFe,
+            $url,
+            $tpAmb,
+            $dhEmi,
+            $vNF,
+            $vICMS,
+            $digVal,
+            $token,
+            $idToken,
+            $versao,
+            $tpEmis,
+            $cDest
         );
+        
         if ($qrcode == '') {
             return $dom->saveXML();
         }
         //inclui a TAG NFe/infNFeSupl com o qrcode
         $infNFeSupl = $dom->createElement("infNFeSupl");
         $nodeqr = $infNFeSupl->appendChild($dom->createElement('qrCode'));
+        $infNFeSupl->appendChild($dom->createElement('urlChave', $url));
         $nodeqr->appendChild($dom->createCDATASection($qrcode));
         $signature = $dom->getElementsByTagName('Signature')->item(0);
         $nfe->insertBefore($infNFeSupl, $signature);
@@ -675,6 +692,59 @@ class ToolsNFe extends BaseTools
         }
         //retorna a string com o xml assinado e com o QRCode
         return $xmlSigned;
+    }
+    
+    protected static function get200(
+        $chNFe,
+        $url,
+        $tpAmb,
+        $dhEmi,
+        $vNF,
+        $vICMS,
+        $digVal,
+        $token,
+        $idToken,
+        $versao,
+        $tpEmis,
+        $cDest
+    ) {
+        $ver = $versao/100;
+        $cscId = (int) $idToken;
+        $csc = $token;
+        if (strpos($url, '?p=') === false) {
+            $url = $url.'?p=';
+        }
+        if ($tpEmis != 9) {
+            //emissão on-line
+            $seq = "$chNFe|$ver|$tpAmb|$cscId";
+            $hash = strtoupper(sha1($seq.$csc));
+            return "$url$seq|$hash";
+        }
+        //emissão off-line
+        $dt = new \DateTime($dhEmi);
+        $dia = $dt->format('d');
+        $valor = number_format($vNF, 2, '.', '');
+        $digHex = self::str2Hex($digVal);
+        $seq = "$chNFe|$ver|$tpAmb|$dia|$valor|$digHex|$cscId";
+        $hash = strtoupper(sha1($seq.$csc));
+        return "$url$seq|$hash";
+    }
+    
+    /**
+     * Convert string to hexadecimal ASCII equivalent
+     * @param  string $str
+     * @return string
+     */
+    protected static function str2Hex($str)
+    {
+        $hex = "";
+        $iCount = 0;
+        $tot = strlen($str);
+        do {
+            $hex .= sprintf("%02x", ord($str{$iCount}));
+            $iCount++;
+        } while ($iCount < $tot);
+        return $hex;
     }
 
     /**
