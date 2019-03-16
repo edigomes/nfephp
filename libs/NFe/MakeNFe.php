@@ -168,6 +168,8 @@ class MakeNFe extends BaseMake
         $this->dom->appChild($this->infNFe, $this->compra, 'Falta tag "infNFe"');
         //[50] tag cana (409 ZC01)
         $this->dom->appChild($this->infNFe, $this->cana, 'Falta tag "infNFe"');
+        // Responsável Técnico
+        $this->dom->appChild($this->infNFe, $this->infRespTec, 'Falta tag "infNFe"');
         //[1] tag infNFe (1 A01)
         $this->dom->appChild($this->NFe, $this->infNFe, 'Falta tag "NFe"');
         //[0] tag NFe
