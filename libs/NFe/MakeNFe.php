@@ -71,7 +71,7 @@ class MakeNFe extends BaseMake
     private $compra = ''; //DOMNode
     private $cana = ''; //DOMNode
     // Arrays
-    private $aTotICMSUFDest = array('pFCPUFDest' => 0, 'vFCPUFDest' => 0, 'vICMSUFDest' => 0, 'vICMSUFRemet' => 0,);
+    private $aTotICMSUFDest = array('pFCPUFDest' => 0, 'vFCPUFDest' => 0, 'vICMSUFDest' => 0, 'vICMSUFRemet' => 0, 'vFCPST' => 0);
     private $aNFref = array(); //array de DOMNode
     private $aDup = array(); //array de DOMNodes
     private $aPag = array(); //array de DOMNodes
@@ -2059,6 +2059,15 @@ class MakeNFe extends BaseMake
                 $this->dom->addChild($icms, 'vBC', $vBC, true, "$identificador [item $nItem] Valor da BC do ICMS");
                 $this->dom->addChild($icms, 'pICMS', $pICMS, true, "$identificador [item $nItem] Alíquota do imposto");
                 $this->dom->addChild($icms, 'vICMS', $vICMS, true, "$identificador [item $nItem] Valor do ICMS");
+                if (!empty($vBCFCP)) {
+                    $this->dom->addChild($icms, 'vBCFCP', $vBCFCP, false, "$identificador [item $nItem] Percentual do Fundo de Combate à Pobreza (FCP)");
+                }
+                if (!empty($pFCP)) {
+                    $this->dom->addChild($icms, 'pFCP', $pFCP, false, "$identificador [item $nItem] Percentual do Fundo de Combate à Pobreza (FCP)");
+                }
+                if (!empty($vFCP)) {
+                    $this->dom->addChild($icms, 'vFCP', $vFCP, false, "$identificador [item $nItem] Valor do Fundo de Combate à Pobreza (FCP)");
+                }
                 $this->dom->addChild($icms, 'modBCST', $modBCST, true, "$identificador [item $nItem] Modalidade de determinação da BC do ICMS ST");
                 $this->dom->addChild(
                     $icms,
@@ -2071,6 +2080,16 @@ class MakeNFe extends BaseMake
                     $this->dom->addChild($icms, 'vBCST', $vBCST, true, "$identificador [item $nItem] Valor da BC do ICMS ST");
                     $this->dom->addChild($icms, 'pICMSST', $pICMSST, true, "$identificador [item $nItem] Alíquota do imposto do ICMS ST");
                     $this->dom->addChild($icms, 'vICMSST', $vICMSST, true, "$identificador [item $nItem] Valor do ICMS ST");
+                    /*if (!empty($vBCFCP)) {
+                        $this->dom->addChild($icms, 'vBCFCPST', $vBCFCP, false, "$identificador [item $nItem] Percentual do Fundo de Combate à Pobreza (FCP)");
+                    }
+                    if (!empty($pFCP)) {
+                        $this->dom->addChild($icms, 'pFCPST', $pFCP, false, "$identificador [item $nItem] Percentual do Fundo de Combate à Pobreza (FCP)");
+                    }
+                    if (!empty($vFCP)) {
+                        $this->dom->addChild($icms, 'vFCPST', $vFCP, false, "$identificador [item $nItem] Valor do Fundo de Combate à Pobreza (FCP)");
+                    }*/
+                    //$this->aTotICMSUFDest['vFCPST'] += $vFCP;
                 break;
             case '20':
                 $icms = $this->dom->createElement("ICMS20");

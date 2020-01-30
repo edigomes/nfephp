@@ -64,6 +64,12 @@ class ToolsNFe extends BaseTools
      * @var bool
      */
     private $bSalvarMensagensEvento  = true;
+    
+    public function __construct($configJson = '') {
+        //path config
+        $this->pathwsfiles = realpath(__DIR__ . '/../../config') . '/';
+        parent::__construct($configJson);
+    }
     /**
      * setModelo
      *
@@ -675,7 +681,7 @@ class ToolsNFe extends BaseTools
         //inclui a TAG NFe/infNFeSupl com o qrcode
         $infNFeSupl = $dom->createElement("infNFeSupl");
         $nodeqr = $infNFeSupl->appendChild($dom->createElement('qrCode'));
-        $infNFeSupl->appendChild($dom->createElement('urlChave', $url));
+        $infNFeSupl->appendChild($dom->createElement('urlChave', $this->getURIConsultaNFCe($siglaUF, $tpAmb)));
         $nodeqr->appendChild($dom->createCDATASection($qrcode));
         $signature = $dom->getElementsByTagName('Signature')->item(0);
         $nfe->insertBefore($infNFeSupl, $signature);
@@ -2342,4 +2348,18 @@ class ToolsNFe extends BaseTools
     {
         return $this->oSoap->lastMsg;
     }
+    
+     /**
+     * Get URI for search NFCe by key (chave)
+     * @param string $uf Abbreviation of the UF
+     * @param string $tpAmb SEFAZ environment, 1-Production or 2-Homologation
+     * @return string
+     */
+    protected function getURIConsultaNFCe($uf, $tpAmb)
+    {
+        $arr = json_decode(file_get_contents($this->pathwsfiles . 'uri_consulta_nfce.json'), true);
+        $std = json_decode(json_encode($arr[$tpAmb]));
+        return $std->$uf;
+    }
+    
 }

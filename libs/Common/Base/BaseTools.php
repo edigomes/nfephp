@@ -222,6 +222,11 @@ class BaseTools
         'TO'=>'17',
         'SVAN' => '91'
     );
+    /**
+     * Path to storage folder
+     * @var string
+     */
+    public $pathwsfiles = '';
     
     /**
      * __construct
@@ -797,5 +802,18 @@ class BaseTools
             $url = $this->urlService;
         }
         return $url;
+    }
+    
+    /**
+     * Get URI for search NFCe by key (chave)
+     * @param string $uf Abbreviation of the UF
+     * @param string $tpAmb SEFAZ environment, 1-Production or 2-Homologation
+     * @return string
+     */
+    protected function getURIConsultaNFCe($uf, $tpAmb)
+    {
+        $arr = json_decode(file_get_contents($this->pathwsfiles . 'uri_consulta_nfce.json'), true);
+        $std = json_decode(json_encode($arr[$tpAmb]));
+        return $std->$uf;
     }
 }
