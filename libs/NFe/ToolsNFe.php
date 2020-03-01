@@ -1394,12 +1394,12 @@ class ToolsNFe extends BaseTools
         $lastMsg = $this->oSoap->lastMsg;
         $this->soapDebug = $this->oSoap->soapDebug;
         //salva mensagens
-        $tipoNSU = (int) ($numNSU != 0 ? $numNSU : $ultNSU);
+        /*$tipoNSU = (int) ($numNSU != 0 ? $numNSU : $ultNSU);
         $datahora = date('Ymd_His');
         $filename = "$tipoNSU-$datahora-distDFeInt.xml";
         $this->zGravaFile('nfe', $tpAmb, $filename, $lastMsg);
         $filename = "$tipoNSU-$datahora-retDistDFeInt.xml";
-        $this->zGravaFile('nfe', $tpAmb, $filename, $retorno);
+        $this->zGravaFile('nfe', $tpAmb, $filename, $retorno);*/
         //tratar dados de retorno
         $aRetorno = ReturnNFe::readReturnSefaz($servico, $retorno);
         return (string) $retorno;
