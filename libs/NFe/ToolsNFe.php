@@ -1766,6 +1766,48 @@ class ToolsNFe extends BaseTools
         $aRetorno = $this->aLastRetEvent;
         return $retorno;
     }
+    
+    /**
+     * sefazCancela
+     * Solicita o cancelamento da NFe
+     *
+     * @param  string $chNFe
+     * @param  string $tpAmb
+     * @param  string $xJust
+     * @param  string $nProt
+     * @param  array  $aRetorno
+     * @return string
+     * @throws Exception\InvalidArgumentException
+     */
+    public function sefazCancelaDuplicidade($chNFe = '', $tpAmb = '2', $xJust = '', $nProt = '', $chNFeRef = '', &$aRetorno = array())
+    {
+        $chNFe = preg_replace('/[^0-9]/', '', $chNFe);
+        $nProt = preg_replace('/[^0-9]/', '', $nProt);
+        $xJust = Strings::cleanString($xJust);
+        //validação dos dados de entrada
+        if (strlen($chNFe) != 44) {
+            $msg = "Uma chave de NFe válida não foi passada como parâmetro $chNFe.";
+            throw new Exception\InvalidArgumentException($msg);
+        }
+        if ($nProt == '') {
+            $msg = "Não foi passado o numero do protocolo!!";
+            throw new Exception\InvalidArgumentException($msg);
+        }
+        if (strlen($xJust) < 15 || strlen($xJust) > 255) {
+            $msg = "A justificativa deve ter pelo menos 15 digitos e no máximo 255!!";
+            throw new Exception\InvalidArgumentException($msg);
+        }
+        $siglaUF = $this->zGetSigla(substr($chNFe, 0, 2));
+        $cOrgaoAutor = substr($chNFe, 0, 2);
+        //estabelece o codigo do tipo de evento CANCELAMENTO
+        $tpEvento = '110112';
+        $nSeqEvento = 1;
+        //monta mensagem
+        $tagAdic = "<cOrgaoAutor>$cOrgaoAutor</cOrgaoAutor><tpAutor>1</tpAutor><verAplic>aconos_erp_4.0.44</verAplic><nProt>$nProt</nProt><xJust>$xJust</xJust><chNFeRef>$chNFeRef</chNFeRef>";
+        $retorno = $this->zSefazEvento($siglaUF, $chNFe, $tpAmb, $tpEvento, $nSeqEvento, $tagAdic);
+        $aRetorno = $this->aLastRetEvent;
+        return $retorno;
+    }
 
     /**
      * sefazManifesta
@@ -2153,6 +2195,11 @@ class ToolsNFe extends BaseTools
                 //cancelamento
                 $aliasEvento = 'CancNFe';
                 $descEvento = 'Cancelamento';
+                break;
+            case '110112':
+                //cancelamento
+                $aliasEvento = 'CancNFe';
+                $descEvento = 'Cancelamento por substituicao';
                 break;
             case '110140':
                 //EPEC
