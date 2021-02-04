@@ -22,11 +22,11 @@ class CommonNFePHP
             return;
         }
         //se não foi passado o caminho para o logo procurar diretorio abaixo
-        /*$imgPath = "logos/" . $this->emit->getElementsByTagName("CNPJ")->item(0)->nodeValue . ".jpg";
+        $imgPath = "../"; //"logos/" . $this->emit->getElementsByTagName("CNPJ")->item(0)->nodeValue . ".jpg";
         if (file_exists($imgPath)) {
             $this->logomarca = $imgPath;
             return;
-        }*/
+        }
         //procurar diretorio acima do anterior
         $imgPath = "../" . $imgPath;
         if (file_exists($imgPath)) {
