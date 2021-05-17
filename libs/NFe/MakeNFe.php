@@ -398,6 +398,15 @@ class MakeNFe extends BaseMake
             true,
             $identificador . "Indicador de presença do comprador no estabelecimento comercial no momento da operação"
         );
+        if ($mod == '55' && $tpAmb = 2) {
+            $this->dom->addChild(
+                $ide,
+                "indIntermed",
+                "0",
+                true,
+                $identificador . "Indicador de presença do comprador no estabelecimento comercial no momento da operação"
+            );
+        }
         $this->dom->addChild(
             $ide,
             "procEmi",
@@ -3126,7 +3135,8 @@ class MakeNFe extends BaseMake
         $vCOFINS = '',
         $vOutro = '',
         $vNF = '',
-        $vTotTrib = ''
+        $vTotTrib = '',
+        $vIPIDevol = ''
     ) {
         $this->zTagtotal();
         $ICMSTot = $this->dom->createElement("ICMSTot");
@@ -3147,7 +3157,7 @@ class MakeNFe extends BaseMake
         $this->dom->addChild($ICMSTot, "vDesc", $vDesc, true, "Valor Total do Desconto");
         $this->dom->addChild($ICMSTot, "vII", $vII, true, "Valor Total do II");
         $this->dom->addChild($ICMSTot, "vIPI", $vIPI, true, "Valor Total do IPI");
-        $this->dom->addChild($ICMSTot, "vIPIDevol", "0.00", true, "Valor Total do IPI Devol");
+        $this->dom->addChild($ICMSTot, "vIPIDevol", $vIPIDevol, true, "Valor Total do IPI Devol");
         $this->dom->addChild($ICMSTot, "vPIS", $vPIS, true, "Valor do PIS");
         $this->dom->addChild($ICMSTot, "vCOFINS", $vCOFINS, true, "Valor da COFINS");
         $this->dom->addChild($ICMSTot, "vOutro", $vOutro, true, "Outras Despesas acessórias");
