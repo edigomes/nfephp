@@ -360,6 +360,11 @@ class Danfe extends CommonNFePHP implements DocumentoNFePHP
      * @var integer
      */
     protected $debugMode=2;
+    /**
+     * 
+     * @var type
+     */
+    public $IPIDevol = false;
 
     /**
      * __construct
@@ -1971,7 +1976,12 @@ class Danfe extends CommonNFePHP implements DocumentoNFePHP
         $x = $this->pImpostoDanfeHelper($x, $y, $w, $h, "VALOR DO SEGURO", "vSeg");
         $x = $this->pImpostoDanfeHelper($x, $y, $w, $h, "DESCONTO", "vDesc");
         $x = $this->pImpostoDanfeHelper($x, $y, $w, $h, "OUTRAS DESPESAS", "vOutro");
-        $x = $this->pImpostoDanfeHelper($x, $y, $w, $h, "VALOR TOTAL IPI", "vIPI");
+        
+        if ($this->ICMSTot->getElementsByTagName('vIPIDevol')->item(0)) {
+            $x = $this->pImpostoDanfeHelper($x, $y, $w, $h, "VALOR TOTAL IPI", "vIPIDevol");
+        } else {
+            $x = $this->pImpostoDanfeHelper($x, $y, $w, $h, "VALOR TOTAL IPI", "vIPI");
+        }
 
         if ($this->exibirIcmsInterestadual) {
             $x = $this->pImpostoDanfeHelper($x, $y, $w, $h, "V. ICMS UF DEST.", "vICMSUFDest");
@@ -2520,12 +2530,15 @@ class Danfe extends CommonNFePHP implements DocumentoNFePHP
                 //carrega as tags do item
                 $prod = $thisItem->getElementsByTagName("prod")->item(0);
                 $imposto = $this->det->item($i)->getElementsByTagName("imposto")->item(0);
+                $impostoDevol = $this->det->item($i)->getElementsByTagName("impostoDevol")->item(0);
                 $ICMS = $imposto->getElementsByTagName("ICMS")->item(0);
                 $IPI  = $imposto->getElementsByTagName("IPI")->item(0);
+                $IPIDevol  = isset($impostoDevol) ? $impostoDevol->getElementsByTagName("IPI")->item(0) : null;
                 $textoProduto = $this->pDescricaoProduto($thisItem);
                 $linhaDescr = $this->pGetNumLines($textoProduto, $w2, $aFont);
                 $h = round(($linhaDescr * $this->pdf->FontSize)+ ($linhaDescr * 0.5), 2);
                 $hUsado += $h;
+                //dd($IPIDevol);
                 if ($pag != $totpag) {
                     if ($hUsado >= $hmax && $i < $totItens) {
                         //ultrapassa a capacidade para uma única página
@@ -2623,6 +2636,13 @@ class Danfe extends CommonNFePHP implements DocumentoNFePHP
                 } else {
                     $texto = '';
                 }
+                if (isset($IPIDevol)) {
+                    $texto = ! empty($IPIDevol->getElementsByTagName("vIPIDevol")->item(0)->nodeValue) ?
+                            number_format($IPIDevol->getElementsByTagName("vIPIDevol")->item(0)->nodeValue, 2, ",", ".") :'';
+                    $this->IPIDevol = true;
+                } else {
+                    $texto = '';
+                }
                 $this->pTextBox($x, $y, $w12, $h, $texto, $aFont, 'T', $alinhamento, 0, '');
                 // %ICMS
                 $x += $w12;
@@ -2641,6 +2661,15 @@ class Danfe extends CommonNFePHP implements DocumentoNFePHP
                 if (isset($IPI)) {
                     $texto = ! empty($IPI->getElementsByTagName("pIPI")->item(0)->nodeValue) ?
                             number_format($IPI->getElementsByTagName("pIPI")->item(0)->nodeValue, 2, ",", ".") : '';
+                } else {
+                    $texto = '';
+                }
+                if (isset($IPIDevol)) {
+                    $vIPI = $IPIDevol->getElementsByTagName("vIPIDevol")->item(0)->nodeValue;
+                    $vBC = $ICMS->getElementsByTagName("vBC")->item(0)->nodeValue;
+                    $pIPI = ($vIPI/$vBC)*100;
+                    $texto = ! empty($pIPI) ?
+                            number_format($pIPI, 2, ",", ".") : '';
                 } else {
                     $texto = '';
                 }
