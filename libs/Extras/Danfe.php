@@ -2669,7 +2669,7 @@ class Danfe extends CommonNFePHP implements DocumentoNFePHP
                     $vProd = $prod->getElementsByTagName("vProd")->item(0)->nodeValue;
                     $pIPI = round(($vIPI/$vProd)*100);
                     $texto = ! empty($pIPI) ?
-                            number_format($pIPI, 0, ",", ".") : '';
+                            number_format($pIPI, 2, ",", ".") : '';
                 } else {
                     $texto = '';
                 }
