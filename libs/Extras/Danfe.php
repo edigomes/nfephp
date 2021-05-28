@@ -1976,8 +1976,9 @@ class Danfe extends CommonNFePHP implements DocumentoNFePHP
         $x = $this->pImpostoDanfeHelper($x, $y, $w, $h, "VALOR DO SEGURO", "vSeg");
         $x = $this->pImpostoDanfeHelper($x, $y, $w, $h, "DESCONTO", "vDesc");
         $x = $this->pImpostoDanfeHelper($x, $y, $w, $h, "OUTRAS DESPESAS", "vOutro");
+        
         if ($this->ICMSTot->getElementsByTagName('vIPIDevol')->item(0) != null && $this->ICMSTot->getElementsByTagName('vIPIDevol')->item(0)->nodeValue > 0) {
-            $x = $this->pImpostoDanfeHelper($x, $y, $w, $h, "VALOR TOTAL IPI", "vIPIDevol");
+            $x = $this->pImpostoDanfeHelper($x, $y, $w, $h, "VALOR TOTAL IPI DEV", "vIPIDevol");
         } else {
             $x = $this->pImpostoDanfeHelper($x, $y, $w, $h, "VALOR TOTAL IPI", "vIPI");
         }
@@ -2628,13 +2629,15 @@ class Danfe extends CommonNFePHP implements DocumentoNFePHP
                 }
                 //Valor do IPI
                 $x += $w11;
-                if (is_null($IPIDevol)) {
+                if (isset($IPI)) {
+                    $this->IPIDevol = true;
                     $texto = ! empty($IPI->getElementsByTagName("vIPI")->item(0)->nodeValue) ?
                             number_format($IPI->getElementsByTagName("vIPI")->item(0)->nodeValue, 2, ",", ".") :'';
-                } else {
+                } else if (!is_null($IPIDevol)) {
                     $texto = ! empty($IPIDevol->getElementsByTagName("vIPIDevol")->item(0)->nodeValue) ?
                             number_format($IPIDevol->getElementsByTagName("vIPIDevol")->item(0)->nodeValue, 2, ",", ".") :'';
-                    $this->IPIDevol = true;
+                } else {
+                    $texto = '';
                 }
                 $this->pTextBox($x, $y, $w12, $h, $texto, $aFont, 'T', $alinhamento, 0, '');
                 // %ICMS
@@ -2657,9 +2660,11 @@ class Danfe extends CommonNFePHP implements DocumentoNFePHP
                     $pIPI = round(($vIPI/$vProd)*100);
                     $texto = ! empty($pIPI) ?
                             number_format($pIPI, 2, ",", ".") : '';
-                } else {
+                } else if (isset($IPI)) {
                     $texto = ! empty($IPI->getElementsByTagName("pIPI")->item(0)->nodeValue) ?
                             number_format($IPI->getElementsByTagName("pIPI")->item(0)->nodeValue, 2, ",", ".") : '';
+                } else {
+                    $texto = '';
                 }
                 $this->pTextBox($x, $y, $w14, $h, $texto, $aFont, 'T', 'C', 0, '');
                 $y += $h;
