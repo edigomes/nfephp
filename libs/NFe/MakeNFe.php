@@ -254,7 +254,8 @@ class MakeNFe extends BaseMake
         $procEmi = '',
         $verProc = '',
         $dhCont = '',
-        $xJust = ''
+        $xJust = '',
+        $indIntermed = ''
     ) {
         $this->tpAmb = $tpAmb;
         $identificador = 'B01 <ide> - ';
@@ -398,15 +399,16 @@ class MakeNFe extends BaseMake
             true,
             $identificador . "Indicador de presença do comprador no estabelecimento comercial no momento da operação"
         );
-        /*if ($mod == '55' && $tpAmb = 2) {
+        //if ($mod == '55') {
+        if ($mod == '55' && $tpAmb = 2) {
             $this->dom->addChild(
                 $ide,
                 "indIntermed",
-                "0",
+                $indIntermed,
                 true,
-                $identificador . "Indicador de presença do comprador no estabelecimento comercial no momento da operação"
+                $identificador . "Indicador de intermediador da operação"
             );
-        }*/
+        }
         $this->dom->addChild(
             $ide,
             "procEmi",
@@ -4346,7 +4348,7 @@ class MakeNFe extends BaseMake
                 $this->dom->appChild($det, $child, "Inclusão do node imposto");
             }
             //insere impostoDevol
-            if (!empty($this->aImpostoDevol)) {
+            if (!empty($this->aImpostoDevol) && isset($this->aImpostoDevol[$nItem])) {
                 $child = $this->aImpostoDevol[$nItem];
                 $this->dom->appChild($det, $child, "Inclusão do node impostoDevol");
             }
