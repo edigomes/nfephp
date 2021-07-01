@@ -400,7 +400,7 @@ class MakeNFe extends BaseMake
             $identificador . "Indicador de presença do comprador no estabelecimento comercial no momento da operação"
         );
         //if ($mod == '55') {
-        if ($mod == '55' && $tpAmb = 2) {
+        if ($mod == '55' && $tpAmb == 2) {
             $this->dom->addChild(
                 $ide,
                 "indIntermed",
