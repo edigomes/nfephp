@@ -400,7 +400,7 @@ class MakeNFe extends BaseMake
             $identificador . "Indicador de presença do comprador no estabelecimento comercial no momento da operação"
         );
         //if ($mod == '55') {
-        if ($mod == '55') {
+        if ($mod == '55' && $tpAmb == 2) {
             $this->dom->addChild(
                 $ide,
                 "indIntermed",
@@ -3667,6 +3667,7 @@ class MakeNFe extends BaseMake
     {
         $possible = [
             'indPag',
+            'xPag',
             'tPag',
             'vPag',
             'CNPJ',
@@ -3678,11 +3679,16 @@ class MakeNFe extends BaseMake
         //padrão para layout 4.00
         $detPag = $this->dom->createElement("detPag");
         $this->dom->addChild(
-                $detPag, "indPag", !is_null($std->indPag) ? $std->indPag : null, false, "Indicador da Forma de Pagamento"
+            $detPag, "indPag", !is_null($std->indPag) ? $std->indPag : null, false, "Indicador da Forma de Pagamento"
         );
         $this->dom->addChild(
-                $detPag, "tPag", $std->tPag, true, "Forma de pagamento"
+            $detPag, "tPag", $std->tPag, true, "Forma de pagamento"
         );
+        if (isset($std->xPag) && !empty($std->xPag) && $std->tPag == '99') {
+            $this->dom->addChild(
+                $detPag, "xPag", $std->tPag, true, "Nome da Forma de pagamento"
+            );
+        }
         $this->dom->addChild(
             $detPag, "vPag", $std->vPag, true, "Valor do Pagamento"
         );
