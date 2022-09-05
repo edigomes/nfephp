@@ -1140,8 +1140,13 @@ class Danfe extends CommonNFePHP implements DocumentoNFePHP
         //se for right separa 2/3 para os dados e o terço seguinte para o logo
         //se não houver logo centraliza dos dados do emitente
         // coloca o logo
-        if (is_file($this->logomarca)) {
-            $logoInfo=getimagesize($this->logomarca);
+        if (!empty($this->logomarca)) {
+            $logoInfo = getimagesize($this->logomarca);
+            $type = strtolower(explode('/', $logoInfo['mime'])[1]);
+            if ($type == 'png') {
+                $this->logomarca = $this->imagePNGtoJPG($this->logomarca);
+                $type == 'jpg';
+            }
             //largura da imagem em mm
             $logoWmm = ($logoInfo[0]/72)*25.4;
             //altura da imagem em mm
@@ -1180,7 +1185,8 @@ class Danfe extends CommonNFePHP implements DocumentoNFePHP
                 $y1 = round($yImg + $nImgH + 1, 0);
                 $tw = $w;
             }
-            $this->pdf->Image($this->logomarca, $xImg, $yImg, $nImgW, $nImgH);
+            $type = (substr($this->logomarca, 0, 7) === 'data://') ? 'jpg' : null;
+            $this->pdf->Image($this->logomarca, $xImg, $yImg, $nImgW, $nImgH, $type);
         } else {
             $x1 = $x;
             $y1 = round($h/3+$y, 0);
@@ -2044,13 +2050,19 @@ class Danfe extends CommonNFePHP implements DocumentoNFePHP
                 $this->transp->getElementsByTagName("modFrete")->item(0)->nodeValue : '0';
         switch ($tipoFrete) {
             case 0:
-                $texto = "(0) Emitente";
+                $texto = "(0) do Remetente";
                 break;
             case 1:
-                $texto = "(1) Dest/Rem";
+                $texto = "(1) do Destinatário";
                 break;
             case 2:
-                $texto = "(2) Terceiros";
+                $texto = "(2) de Terceiros";
+                break;
+            case 3:
+                $texto = "(3) Próprio (Rem)";
+                break;
+            case 4:
+                $texto = "(4) Próprio (Dest)";
                 break;
             case 9:
                 $texto = "(9) Sem Frete";
