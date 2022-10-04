@@ -2645,11 +2645,12 @@ class Danfe extends CommonNFePHP implements DocumentoNFePHP
                     $this->IPIDevol = true;
                     $texto = ! empty($IPI->getElementsByTagName("vIPI")->item(0)->nodeValue) ?
                             number_format($IPI->getElementsByTagName("vIPI")->item(0)->nodeValue, 2, ",", ".") :'';
-                } else if (!is_null($IPIDevol)) {
-                    $texto = ! empty($IPIDevol->getElementsByTagName("vIPIDevol")->item(0)->nodeValue) ?
-                            number_format($IPIDevol->getElementsByTagName("vIPIDevol")->item(0)->nodeValue, 2, ",", ".") :'';
                 } else {
                     $texto = '';
+                }
+                if (!is_null($IPIDevol)) {
+                    $texto = ! empty($IPIDevol->getElementsByTagName("vIPIDevol")->item(0)->nodeValue) ?
+                            number_format($IPIDevol->getElementsByTagName("vIPIDevol")->item(0)->nodeValue, 2, ",", ".") :'';
                 }
                 $this->pTextBox($x, $y, $w12, $h, $texto, $aFont, 'T', $alinhamento, 0, '');
                 // %ICMS
@@ -2669,7 +2670,7 @@ class Danfe extends CommonNFePHP implements DocumentoNFePHP
                 if (!is_null($IPIDevol)) {
                     $vIPI = $IPIDevol->getElementsByTagName("vIPIDevol")->item(0)->nodeValue;
                     $vProd = $prod->getElementsByTagName("vProd")->item(0)->nodeValue;
-                    $pIPI = round(($vIPI/$vProd)*100);
+                    $pIPI = round(($vIPI/$vProd)*100, 2);
                     $texto = ! empty($pIPI) ?
                             number_format($pIPI, 2, ",", ".") : '';
                 } else if (isset($IPI)) {
