@@ -1870,6 +1870,7 @@ class MakeNFe extends BaseMake
     public function tagcomb(
         $nItem = '',
         $cProdANP = '',
+        $descANP = '',
         $pMixGN = '',
         $codif = '',
         $qTemp = '',
@@ -1881,6 +1882,15 @@ class MakeNFe extends BaseMake
         $identificador = 'L101 <comb> - ';
         $comb = $this->dom->createElement("comb");
         $this->dom->addChild($comb, "cProdANP", $cProdANP, true, "$identificador [item $nItem] Código de produto da ANP");
+        $this->dom->addChild(
+            $comb,
+            "descANP",
+            $descANP,
+            true,
+            "$identificador [item $nItem] Utilizar a descrição de produtos do "
+                . "Sistema de Informações de Movimentação de Produtos - "
+                . "SIMP (http://www.anp.gov.br/simp/"
+        );
         $this->dom->addChild(
             $comb,
             "pMixGN",
