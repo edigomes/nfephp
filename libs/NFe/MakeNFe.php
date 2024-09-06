@@ -1827,7 +1827,7 @@ class MakeNFe extends BaseMake
      * @param  string $vPMC
      * @return DOMElement
      */
-    public function rastro(
+    public function tagrastro(
         $nItem = '',
         $nLote = '',
         $qLote = '',
