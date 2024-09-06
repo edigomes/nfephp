@@ -1813,6 +1813,48 @@ class MakeNFe extends BaseMake
         $this->aMed[$nItem][] = $med;
         return $med;
     }
+
+    /**
+     * tagrastro
+     * Detalhamento de medicamentos K01 pai I90
+     * tag NFe/infNFe/det[]/prod/med (opcional)
+     *
+     * @param  string $nItem
+     * @param  string $nLote
+     * @param  string $qLote
+     * @param  string $dFab
+     * @param  string $dVal
+     * @param  string $vPMC
+     * @return DOMElement
+     */
+    public function rastro(
+        $nItem = '',
+        $nLote = '',
+        $qLote = '',
+        $dFab = '',
+        $dVal = ''
+    ) {
+        $identificador = 'I80 <rastro> - ';
+        $med = $this->dom->createElement("rastro");
+        $this->dom->addChild(
+            $med,
+            "nLote",
+            $nLote,
+            true,
+            "$identificador [item $nItem] Número do Lote"
+        );
+        $this->dom->addChild(
+            $med,
+            "qLote",
+            $qLote,
+            true,
+            "$identificador [item $nItem] Quantidade de produto no Lote"
+        );
+        $this->dom->addChild($med, "dFab", $dFab, true, "$identificador [item $nItem] Data de fabricação");
+        $this->dom->addChild($med, "dVal", $dVal, true, "$identificador [item $nItem] Data de validade");
+        $this->aMed[$nItem][] = $med;
+        return $med;
+    }
     
     /**
      * tagarma
