@@ -1816,15 +1816,14 @@ class MakeNFe extends BaseMake
 
     /**
      * tagrastro
-     * Detalhamento de medicamentos K01 pai I90
-     * tag NFe/infNFe/det[]/prod/med (opcional)
+     * Detalhamento de medicamentos I80 pai I90
+     * tag NFe/infNFe/det[]/prod/rastro (opcional)
      *
      * @param  string $nItem
      * @param  string $nLote
      * @param  string $qLote
      * @param  string $dFab
      * @param  string $dVal
-     * @param  string $vPMC
      * @return DOMElement
      */
     public function tagrastro(
@@ -1835,25 +1834,25 @@ class MakeNFe extends BaseMake
         $dVal = ''
     ) {
         $identificador = 'I80 <rastro> - ';
-        $med = $this->dom->createElement("rastro");
+        $rastro = $this->dom->createElement("rastro");
         $this->dom->addChild(
-            $med,
+            $rastro,
             "nLote",
             $nLote,
             true,
             "$identificador [item $nItem] Número do Lote"
         );
         $this->dom->addChild(
-            $med,
+            $rastro,
             "qLote",
             $qLote,
             true,
             "$identificador [item $nItem] Quantidade de produto no Lote"
         );
-        $this->dom->addChild($med, "dFab", $dFab, true, "$identificador [item $nItem] Data de fabricação");
-        $this->dom->addChild($med, "dVal", $dVal, true, "$identificador [item $nItem] Data de validade");
-        $this->aMed[$nItem][] = $med;
-        return $med;
+        $this->dom->addChild($rastro, "dFab", $dFab, true, "$identificador [item $nItem] Data de fabricação");
+        $this->dom->addChild($rastro, "dVal", $dVal, true, "$identificador [item $nItem] Data de validade");
+        $this->aMed[$nItem][] = $rastro;
+        return $rastro;
     }
     
     /**
