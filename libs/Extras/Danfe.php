@@ -1553,181 +1553,243 @@ class Danfe extends CommonNFePHP implements DocumentoNFePHP
         $w = $maxW;
         $h = 7;
         $texto = 'DESTINATÁRIO / REMETENTE';
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>7, 'style'=>'B');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 7, 'style' => 'B'];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 0, '');
-        //NOME / RAZÃO SOCIAL
-        $w = round($maxW*0.61, 0);
+
+        // NOME / RAZÃO SOCIAL
+        $w  = round($maxW * 0.61, 0);
         $w1 = $w;
         $y += 3;
-        $texto = 'NOME / RAZÃO SOCIAL';
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>6, 'style'=>'');
-        $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 1, '');
-        $texto = $this->dest->getElementsByTagName("xNome")->item(0)->nodeValue;
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>10, 'style'=>'B');
-        if ($this->orientacao == 'P') {
-            $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'L', 0, '');
+
+        // Verificar se possui nome fantasia
+        $hasFantasia = function_exists('request') && request()->exists('xFant');
+
+        if ($hasFantasia) {
+            // NOME FANTASIA primeiro
+            $texto = 'NOME FANTASIA';
+            $aFont = ['font' => $this->fontePadrao, 'size' => 6, 'style' => ''];
+            $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 1, '');
+
+            $textoFantasia = request()->get('xFant'); //$this->dest->getElementsByTagName("xFant")->item(0)->nodeValue;
+            $aFont = ['font' => $this->fontePadrao, 'size' => 10, 'style' => 'B'];
+            if ($this->orientacao == 'P') {
+                $this->pTextBox($x, $y, $w, $h, $textoFantasia, $aFont, 'B', 'L', 0, '');
+            } else {
+                $this->pTextBox($x, $y, $w, $h, $textoFantasia, $aFont, 'B', 'L', 1, '');
+            }
+
+            // RAZÃO SOCIAL depois
+            $y += $h;
+            $texto = 'NOME / RAZÃO SOCIAL';
+            $aFont = ['font' => $this->fontePadrao, 'size' => 6, 'style' => ''];
+            $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 1, '');
+
+            $texto = $this->dest->getElementsByTagName("xNome")->item(0)->nodeValue;
+            $aFont = ['font' => $this->fontePadrao, 'size' => 10, 'style' => 'B'];
+            if ($this->orientacao == 'P') {
+                $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'L', 0, '');
+            } else {
+                $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'L', 1, '');
+            }
         } else {
-            $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'L', 1, '');
+            // Apenas RAZÃO SOCIAL quando não tem fantasia
+            $texto = 'NOME / RAZÃO SOCIAL';
+            $aFont = ['font' => $this->fontePadrao, 'size' => 6, 'style' => ''];
+            $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 1, '');
+
+            $texto = $this->dest->getElementsByTagName("xNome")->item(0)->nodeValue;
+            $aFont = ['font' => $this->fontePadrao, 'size' => 10, 'style' => 'B'];
+            if ($this->orientacao == 'P') {
+                $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'L', 0, '');
+            } else {
+                $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'L', 1, '');
+            }
         }
-        //CNPJ / CPF
+
+        // CNPJ / CPF
         $x += $w;
-        $w = round($maxW*0.23, 0);
+        $w = round($maxW * 0.23, 0);
         $w2 = $w;
         $texto = 'CNPJ / CPF';
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>6, 'style'=>'');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 6, 'style' => ''];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 1, '');
-        //Pegando valor do CPF/CNPJ
-        if (! empty($this->dest->getElementsByTagName("CNPJ")->item(0)->nodeValue)) {
+
+        if (!empty($this->dest->getElementsByTagName("CNPJ")->item(0)->nodeValue)) {
             $texto = $this->pFormat(
                 $this->dest->getElementsByTagName("CNPJ")->item(0)->nodeValue,
                 "###.###.###/####-##"
             );
         } else {
-            $texto = ! empty($this->dest->getElementsByTagName("CPF")->item(0)->nodeValue) ?
-                    $this->pFormat(
-                        $this->dest->getElementsByTagName("CPF")->item(0)->nodeValue,
-                        "###.###.###-##"
-                    ) : '';
+            $texto = !empty($this->dest->getElementsByTagName("CPF")->item(0)->nodeValue)
+                ? $this->pFormat(
+                    $this->dest->getElementsByTagName("CPF")->item(0)->nodeValue,
+                    "###.###.###-##"
+                )
+                : '';
         }
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>10, 'style'=>'B');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 10, 'style' => 'B'];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'C', 0, '');
-        //DATA DA EMISSÃO
+
+        // DATA DA EMISSÃO
         $x += $w;
-        $w = $maxW-($w1+$w2);
+        $w = $maxW - ($w1 + $w2);
         $wx = $w;
         $texto = 'DATA DA EMISSÃO';
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>6, 'style'=>'');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 6, 'style' => ''];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 1, '');
-        $dEmi = ! empty($this->ide->getElementsByTagName("dEmi")->item(0)->nodeValue) ?
-                $this->ide->getElementsByTagName("dEmi")->item(0)->nodeValue : '';
+
+        $dEmi = !empty($this->ide->getElementsByTagName("dEmi")->item(0)->nodeValue)
+            ? $this->ide->getElementsByTagName("dEmi")->item(0)->nodeValue
+            : '';
         if ($dEmi == '') {
-            $dEmi = ! empty($this->ide->getElementsByTagName("dhEmi")->item(0)->nodeValue) ?
-                    $this->ide->getElementsByTagName("dhEmi")->item(0)->nodeValue : '';
+            $dEmi = !empty($this->ide->getElementsByTagName("dhEmi")->item(0)->nodeValue)
+                ? $this->ide->getElementsByTagName("dhEmi")->item(0)->nodeValue
+                : '';
             $aDemi = explode('T', $dEmi);
             $dEmi = $aDemi[0];
         }
         $texto = $this->pYmd2dmy($dEmi);
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>10, 'style'=>'B');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 10, 'style' => 'B'];
         if ($this->orientacao == 'P') {
             $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'C', 0, '');
         } else {
             $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'C', 1, '');
         }
-        //ENDEREÇO
-        $w = round($maxW*0.47, 0);
+
+        // ENDEREÇO
+        $w = round($maxW * 0.47, 0);
         $w1 = $w;
         $y += $h;
         $x = $oldX;
         $texto = 'ENDEREÇO';
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>6, 'style'=>'');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 6, 'style' => ''];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 1, '');
+
         $texto = $this->dest->getElementsByTagName("xLgr")->item(0)->nodeValue;
         $texto .= ', ' . $this->dest->getElementsByTagName("nro")->item(0)->nodeValue;
         $texto .= $this->pSimpleGetValue($this->dest, "xCpl", " - ");
-
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>10, 'style'=>'B');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 10, 'style' => 'B'];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'L', 0, '', true);
-        //BAIRRO / DISTRITO
+
+        // BAIRRO / DISTRITO
         $x += $w;
-        $w = round($maxW*0.21, 0);
+        $w = round($maxW * 0.21, 0);
         $w2 = $w;
         $texto = 'BAIRRO / DISTRITO';
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>6, 'style'=>'');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 6, 'style' => ''];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 1, '');
+
         $texto = $this->dest->getElementsByTagName("xBairro")->item(0)->nodeValue;
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>10, 'style'=>'B');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 10, 'style' => 'B'];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'C', 0, '');
-        //CEP
+
+        // CEP
         $x += $w;
-        $w = $maxW-$w1-$w2-$wx;
+        $w = $maxW - $w1 - $w2 - $wx;
         $w2 = $w;
         $texto = 'CEP';
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>6, 'style'=>'');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 6, 'style' => ''];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 1, '');
-        $texto = ! empty($this->dest->getElementsByTagName("CEP")->item(0)->nodeValue) ?
-                $this->dest->getElementsByTagName("CEP")->item(0)->nodeValue : '';
+
+        $texto = !empty($this->dest->getElementsByTagName("CEP")->item(0)->nodeValue)
+            ? $this->dest->getElementsByTagName("CEP")->item(0)->nodeValue
+            : '';
         $texto = $this->pFormat($texto, "#####-###");
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>10, 'style'=>'B');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 10, 'style' => 'B'];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'C', 0, '');
-        //DATA DA SAÍDA
+
+        // DATA DA SAÍDA/ENTRADA
         $x += $w;
         $w = $wx;
         $texto = 'DATA DA SAÍDA/ENTRADA';
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>6, 'style'=>'');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 6, 'style' => ''];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 1, '');
-        $dSaiEnt = ! empty($this->ide->getElementsByTagName("dSaiEnt")->item(0)->nodeValue) ?
-                $this->ide->getElementsByTagName("dSaiEnt")->item(0)->nodeValue : '';
+
+        $dSaiEnt = !empty($this->ide->getElementsByTagName("dSaiEnt")->item(0)->nodeValue)
+            ? $this->ide->getElementsByTagName("dSaiEnt")->item(0)->nodeValue
+            : '';
         if ($dSaiEnt == '') {
-            $dSaiEnt = ! empty($this->ide->getElementsByTagName("dhSaiEnt")->item(0)->nodeValue) ?
-                    $this->ide->getElementsByTagName("dhSaiEnt")->item(0)->nodeValue : '';
+            $dSaiEnt = !empty($this->ide->getElementsByTagName("dhSaiEnt")->item(0)->nodeValue)
+                ? $this->ide->getElementsByTagName("dhSaiEnt")->item(0)->nodeValue
+                : '';
             $aDsaient = explode('T', $dSaiEnt);
             $dSaiEnt = $aDsaient[0];
         }
         $texto = $this->pYmd2dmy($dSaiEnt);
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>10, 'style'=>'B');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 10, 'style' => 'B'];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'C', 0, '');
-        //MUNICÍPIO
+
+        // MUNICÍPIO
         $w = $w1;
         $y += $h;
         $x = $oldX;
         $texto = 'MUNICÍPIO';
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>6, 'style'=>'');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 6, 'style' => ''];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 1, '');
+
         $texto = $this->dest->getElementsByTagName("xMun")->item(0)->nodeValue;
         if (strtoupper(trim($texto)) == "EXTERIOR" && $this->dest->getElementsByTagName("xPais")->length > 0) {
-            $texto .= " - " .  $this->dest->getElementsByTagName("xPais")->item(0)->nodeValue;
+            $texto .= " - " . $this->dest->getElementsByTagName("xPais")->item(0)->nodeValue;
         }
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>10, 'style'=>'B');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 10, 'style' => 'B'];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'L', 0, '');
-        //UF
+
+        // UF
         $x += $w;
         $w = 8;
         $texto = 'UF';
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>6, 'style'=>'');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 6, 'style' => ''];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 1, '');
         $texto = $this->dest->getElementsByTagName("UF")->item(0)->nodeValue;
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>10, 'style'=>'B');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 10, 'style' => 'B'];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'C', 0, '');
-        //FONE / FAX
+
+        // FONE / FAX
         $x += $w;
-        $w = round(($maxW -$w1-$wx-8)/2, 0);
+        $w = round(($maxW - $w1 - $wx - 8) / 2, 0);
         $w3 = $w;
         $texto = 'FONE / FAX';
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>6, 'style'=>'');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 6, 'style' => ''];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 1, '');
-        $texto = ! empty($this->dest->getElementsByTagName("fone")->item(0)->nodeValue) ?
-                $this->dest->getElementsByTagName("fone")->item(0)->nodeValue : '';
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>10, 'style'=>'B');
+        $texto = !empty($this->dest->getElementsByTagName("fone")->item(0)->nodeValue)
+            ? $this->dest->getElementsByTagName("fone")->item(0)->nodeValue
+            : '';
+        $aFont = ['font' => $this->fontePadrao, 'size' => 10, 'style' => 'B'];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'C', 0, '');
-        //INSCRIÇÃO ESTADUAL
+
+        // INSCRIÇÃO ESTADUAL
         $x += $w;
-        $w = $maxW -$w1-$wx-8-$w3;
+        $w = $maxW - $w1 - $wx - 8 - $w3;
         $texto = 'INSCRIÇÃO ESTADUAL';
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>6, 'style'=>'');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 6, 'style' => ''];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 1, '');
         $IE = $this->dest->getElementsByTagName("IE");
         $texto = ($IE && $IE->length > 0) ? $IE->item(0)->nodeValue : '';
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>10, 'style'=>'B');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 10, 'style' => 'B'];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'C', 0, '');
-        //HORA DA SAÍDA
+
+        // HORA DA SAÍDA/ENTRADA
         $x += $w;
         $w = $wx;
         $texto = 'HORA DA SAÍDA/ENTRADA';
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>6, 'style'=>'');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 6, 'style' => ''];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'T', 'L', 1, '');
-        $hSaiEnt = ! empty($this->ide->getElementsByTagName("hSaiEnt")->item(0)->nodeValue) ?
-                $this->ide->getElementsByTagName("hSaiEnt")->item(0)->nodeValue : '';
+        $hSaiEnt = !empty($this->ide->getElementsByTagName("hSaiEnt")->item(0)->nodeValue)
+            ? $this->ide->getElementsByTagName("hSaiEnt")->item(0)->nodeValue
+            : '';
         if ($hSaiEnt == '') {
-            $dhSaiEnt = ! empty($this->ide->getElementsByTagName("dhSaiEnt")->item(0)->nodeValue) ?
-                    $this->ide->getElementsByTagName("dhSaiEnt")->item(0)->nodeValue : '';
+            $dhSaiEnt = !empty($this->ide->getElementsByTagName("dhSaiEnt")->item(0)->nodeValue)
+                ? $this->ide->getElementsByTagName("dhSaiEnt")->item(0)->nodeValue
+                : '';
             $tsDhSaiEnt = $this->pConvertTime($dhSaiEnt);
             if ($tsDhSaiEnt != '') {
                 $hSaiEnt = date('H:i:s', $tsDhSaiEnt);
             }
         }
         $texto = $hSaiEnt;
-        $aFont = array('font'=>$this->fontePadrao, 'size'=>10, 'style'=>'B');
+        $aFont = ['font' => $this->fontePadrao, 'size' => 10, 'style' => 'B'];
         $this->pTextBox($x, $y, $w, $h, $texto, $aFont, 'B', 'C', 0, '');
+
         return ($y + $h);
     } //fim da função destinatarioDANFE
 
