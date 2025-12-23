@@ -108,6 +108,25 @@ class MakeNFe extends BaseMake
     private $aProcRef = array(); //array de DOMNodes
     private $aForDia = array(); //array de DOMNodes
     private $aDeduc = array(); //array de DOMNodes
+    private $aIBSCBS = array(); //array de DOMNodes - Reforma Tributária IBS/CBS
+    // Totais IBS/CBS para Reforma Tributária
+    private $aTotIBSCBS = array(
+        'vBCIBSCBS' => 0,
+        'vDifIBSUF' => 0,
+        'vDevTribIBSUF' => 0,
+        'vIBSUF' => 0,
+        'vDifIBSMun' => 0,
+        'vDevTribIBSMun' => 0,
+        'vIBSMun' => 0,
+        'vIBS' => 0,
+        'vCredPresIBS' => 0,
+        'vCredPresCondSusIBS' => 0,
+        'vDifCBS' => 0,
+        'vDevTribCBS' => 0,
+        'vCBS' => 0,
+        'vCredPresCBS' => 0,
+        'vCredPresCondSusCBS' => 0
+    );
 
     /**
      * montaNFe
@@ -3040,6 +3059,134 @@ class MakeNFe extends BaseMake
     }
 
     /**
+     * tagIBSCBS
+     * Grupo IBS/CBS da Reforma Tributária - tag pai M01
+     * tag NFe/infNFe/det[]/imposto/IBSCBS (opcional)
+     *
+     * Estrutura baseada na NT da Reforma Tributária:
+     * - CST: Código de Situação Tributária do IBS/CBS
+     * - cClassTrib: Código de classificação tributária
+     * - gIBSCBS: Grupo de valores do IBS e CBS
+     *   - vBC: Base de Cálculo
+     *   - gIBSUF: IBS Estadual
+     *   - gIBSMun: IBS Municipal
+     *   - vIBS: Valor total do IBS
+     *   - gCBS: CBS Federal
+     *
+     * @param  string $nItem Número do item
+     * @param  string $CST Código de Situação Tributária do IBS/CBS (100-999)
+     * @param  string $cClassTrib Código de classificação tributária
+     * @param  string $vBC Valor da Base de Cálculo
+     * @param  string $pIBSUF Alíquota do IBS UF
+     * @param  string $pRedAliqIBSUF Percentual de redução de alíquota IBS UF
+     * @param  string $pAliqEfetIBSUF Alíquota efetiva IBS UF
+     * @param  string $vIBSUF Valor do IBS UF
+     * @param  string $pIBSMun Alíquota do IBS Municipal
+     * @param  string $pRedAliqIBSMun Percentual de redução de alíquota IBS Municipal
+     * @param  string $pAliqEfetIBSMun Alíquota efetiva IBS Municipal
+     * @param  string $vIBSMun Valor do IBS Municipal
+     * @param  string $vIBS Valor total do IBS (UF + Municipal)
+     * @param  string $pCBS Alíquota da CBS
+     * @param  string $pRedAliqCBS Percentual de redução de alíquota CBS
+     * @param  string $pAliqEfetCBS Alíquota efetiva CBS
+     * @param  string $vCBS Valor da CBS
+     * @return DOMElement
+     */
+    public function tagIBSCBS(
+        $nItem = '',
+        $CST = '',
+        $cClassTrib = '',
+        $vBC = '',
+        $pIBSUF = '',
+        $pRedAliqIBSUF = '',
+        $pAliqEfetIBSUF = '',
+        $vIBSUF = '',
+        $pIBSMun = '',
+        $pRedAliqIBSMun = '',
+        $pAliqEfetIBSMun = '',
+        $vIBSMun = '',
+        $vIBS = '',
+        $pCBS = '',
+        $pRedAliqCBS = '',
+        $pAliqEfetCBS = '',
+        $vCBS = ''
+    ) {
+        $identificador = "[item $nItem] ";
+
+        // Cria a tag principal IBSCBS
+        $ibscbs = $this->dom->createElement("IBSCBS");
+
+        // Adiciona CST e cClassTrib como filhos diretos de IBSCBS
+        $this->dom->addChild($ibscbs, "CST", $CST, true, $identificador . "Código de Situação Tributária do IBS/CBS");
+        $this->dom->addChild($ibscbs, "cClassTrib", $cClassTrib, false, $identificador . "Código de classificação tributária");
+
+        // Cria o grupo gIBSCBS
+        $gIBSCBS = $this->dom->createElement("gIBSCBS");
+        $this->dom->addChild($gIBSCBS, "vBC", $vBC, true, $identificador . "Base de Cálculo do IBS/CBS");
+
+        // Grupo gIBSUF (IBS Estadual)
+        $gIBSUF = $this->dom->createElement("gIBSUF");
+        $this->dom->addChild($gIBSUF, "pIBSUF", $pIBSUF, false, $identificador . "Alíquota do IBS UF");
+
+        // Grupo de Redução gRed para IBS UF
+        if (!empty($pRedAliqIBSUF) && (float)$pRedAliqIBSUF > 0) {
+            $gRedIBSUF = $this->dom->createElement("gRed");
+            $this->dom->addChild($gRedIBSUF, "pRedAliq", $pRedAliqIBSUF, true, $identificador . "Percentual de redução de alíquota IBS UF");
+            $this->dom->addChild($gRedIBSUF, "pAliqEfet", $pAliqEfetIBSUF, true, $identificador . "Alíquota efetiva IBS UF");
+            $gIBSUF->appendChild($gRedIBSUF);
+        }
+
+        $this->dom->addChild($gIBSUF, "vIBSUF", $vIBSUF, false, $identificador . "Valor do IBS UF");
+        $gIBSCBS->appendChild($gIBSUF);
+
+        // Grupo gIBSMun (IBS Municipal)
+        $gIBSMun = $this->dom->createElement("gIBSMun");
+        $this->dom->addChild($gIBSMun, "pIBSMun", $pIBSMun, false, $identificador . "Alíquota do IBS Municipal");
+
+        // Grupo de Redução gRed para IBS Municipal
+        if (!empty($pRedAliqIBSMun) && (float)$pRedAliqIBSMun > 0) {
+            $gRedIBSMun = $this->dom->createElement("gRed");
+            $this->dom->addChild($gRedIBSMun, "pRedAliq", $pRedAliqIBSMun, true, $identificador . "Percentual de redução de alíquota IBS Municipal");
+            $this->dom->addChild($gRedIBSMun, "pAliqEfet", $pAliqEfetIBSMun, true, $identificador . "Alíquota efetiva IBS Municipal");
+            $gIBSMun->appendChild($gRedIBSMun);
+        }
+
+        $this->dom->addChild($gIBSMun, "vIBSMun", $vIBSMun, false, $identificador . "Valor do IBS Municipal");
+        $gIBSCBS->appendChild($gIBSMun);
+
+        // Valor total do IBS
+        $this->dom->addChild($gIBSCBS, "vIBS", $vIBS, false, $identificador . "Valor total do IBS");
+
+        // Grupo gCBS (CBS Federal)
+        $gCBS = $this->dom->createElement("gCBS");
+        $this->dom->addChild($gCBS, "pCBS", $pCBS, false, $identificador . "Alíquota da CBS");
+
+        // Grupo de Redução gRed para CBS
+        if (!empty($pRedAliqCBS) && (float)$pRedAliqCBS > 0) {
+            $gRedCBS = $this->dom->createElement("gRed");
+            $this->dom->addChild($gRedCBS, "pRedAliq", $pRedAliqCBS, true, $identificador . "Percentual de redução de alíquota CBS");
+            $this->dom->addChild($gRedCBS, "pAliqEfet", $pAliqEfetCBS, true, $identificador . "Alíquota efetiva CBS");
+            $gCBS->appendChild($gRedCBS);
+        }
+
+        $this->dom->addChild($gCBS, "vCBS", $vCBS, false, $identificador . "Valor da CBS");
+        $gIBSCBS->appendChild($gCBS);
+
+        // Adiciona gIBSCBS como filho de IBSCBS
+        $ibscbs->appendChild($gIBSCBS);
+
+        // Acumuladores para totais
+        $this->aTotIBSCBS['vBCIBSCBS'] += (float) $vBC;
+        $this->aTotIBSCBS['vIBSUF'] += (float) $vIBSUF;
+        $this->aTotIBSCBS['vIBSMun'] += (float) $vIBSMun;
+        $this->aTotIBSCBS['vIBS'] += (float) $vIBS;
+        $this->aTotIBSCBS['vCBS'] += (float) $vCBS;
+
+        $this->aIBSCBS[$nItem] = $ibscbs;
+        return $ibscbs;
+    }
+
+    /**
      * tagISSQN
      * Grupo ISSQN U01 pai M01
      * tag NFe/infNFe/det[]/imposto/ISSQN (opcional)
@@ -3230,6 +3377,118 @@ class MakeNFe extends BaseMake
         );
         $this->dom->appChild($this->total, $ICMSTot, '');
         return $ICMSTot;
+    }
+
+    /**
+     * tagIBSCBSTot
+     * Grupo Totais referentes ao IBS e CBS da Reforma Tributária - pai W01
+     * tag NFe/infNFe/total/IBSCBSTot (opcional)
+     *
+     * Estrutura conforme NT da Reforma Tributária:
+     * - vBCIBSCBS: Valor da Base de Cálculo do IBS/CBS
+     * - gIBS: Grupo do IBS
+     *   - gIBSUF: IBS Estadual
+     *   - gIBSMun: IBS Municipal
+     *   - vIBS: Valor total do IBS
+     *   - vCredPres: Valor do crédito presumido
+     *   - vCredPresCondSus: Valor do crédito presumido condição suspensiva
+     * - gCBS: CBS Federal
+     *
+     * @param  string $vBCIBSCBS Valor da Base de Cálculo do IBS/CBS
+     * @param  string $vDifIBSUF Valor diferido IBS UF
+     * @param  string $vDevTribIBSUF Valor da devolução de tributo IBS UF
+     * @param  string $vIBSUF Valor do IBS UF
+     * @param  string $vDifIBSMun Valor diferido IBS Municipal
+     * @param  string $vDevTribIBSMun Valor da devolução de tributo IBS Municipal
+     * @param  string $vIBSMun Valor do IBS Municipal
+     * @param  string $vIBS Valor total do IBS
+     * @param  string $vCredPresIBS Valor do crédito presumido IBS
+     * @param  string $vCredPresCondSusIBS Valor do crédito presumido condição suspensiva IBS
+     * @param  string $vDifCBS Valor diferido CBS
+     * @param  string $vDevTribCBS Valor da devolução de tributo CBS
+     * @param  string $vCBS Valor da CBS
+     * @param  string $vCredPresCBS Valor do crédito presumido CBS
+     * @param  string $vCredPresCondSusCBS Valor do crédito presumido condição suspensiva CBS
+     * @return DOMElement
+     */
+    public function tagIBSCBSTot(
+        $vBCIBSCBS = '',
+        $vDifIBSUF = '',
+        $vDevTribIBSUF = '',
+        $vIBSUF = '',
+        $vDifIBSMun = '',
+        $vDevTribIBSMun = '',
+        $vIBSMun = '',
+        $vIBS = '',
+        $vCredPresIBS = '',
+        $vCredPresCondSusIBS = '',
+        $vDifCBS = '',
+        $vDevTribCBS = '',
+        $vCBS = '',
+        $vCredPresCBS = '',
+        $vCredPresCondSusCBS = ''
+    ) {
+        $this->zTagtotal();
+
+        // Se não foram passados valores, usa os acumuladores
+        if (empty($vBCIBSCBS) && $this->aTotIBSCBS['vBCIBSCBS'] > 0) {
+            $vBCIBSCBS = number_format($this->aTotIBSCBS['vBCIBSCBS'], 2, '.', '');
+        }
+        if (empty($vIBSUF) && $this->aTotIBSCBS['vIBSUF'] > 0) {
+            $vIBSUF = number_format($this->aTotIBSCBS['vIBSUF'], 2, '.', '');
+        }
+        if (empty($vIBSMun) && $this->aTotIBSCBS['vIBSMun'] > 0) {
+            $vIBSMun = number_format($this->aTotIBSCBS['vIBSMun'], 2, '.', '');
+        }
+        if (empty($vIBS) && $this->aTotIBSCBS['vIBS'] > 0) {
+            $vIBS = number_format($this->aTotIBSCBS['vIBS'], 2, '.', '');
+        }
+        if (empty($vCBS) && $this->aTotIBSCBS['vCBS'] > 0) {
+            $vCBS = number_format($this->aTotIBSCBS['vCBS'], 2, '.', '');
+        }
+
+        // Cria a tag principal IBSCBSTot
+        $IBSCBSTot = $this->dom->createElement("IBSCBSTot");
+        $this->dom->addChild($IBSCBSTot, "vBCIBSCBS", $vBCIBSCBS, true, "Valor da Base de Cálculo do IBS/CBS");
+
+        // Grupo gIBS
+        $gIBS = $this->dom->createElement("gIBS");
+
+        // Grupo gIBSUF (IBS Estadual)
+        $gIBSUF = $this->dom->createElement("gIBSUF");
+        $this->dom->addChild($gIBSUF, "vDif", $vDifIBSUF, false, "Valor diferido IBS UF");
+        $this->dom->addChild($gIBSUF, "vDevTrib", $vDevTribIBSUF, false, "Valor da devolução de tributo IBS UF");
+        $this->dom->addChild($gIBSUF, "vIBSUF", $vIBSUF, false, "Valor do IBS UF");
+        $gIBS->appendChild($gIBSUF);
+
+        // Grupo gIBSMun (IBS Municipal)
+        $gIBSMun = $this->dom->createElement("gIBSMun");
+        $this->dom->addChild($gIBSMun, "vDif", $vDifIBSMun, false, "Valor diferido IBS Municipal");
+        $this->dom->addChild($gIBSMun, "vDevTrib", $vDevTribIBSMun, false, "Valor da devolução de tributo IBS Municipal");
+        $this->dom->addChild($gIBSMun, "vIBSMun", $vIBSMun, false, "Valor do IBS Municipal");
+        $gIBS->appendChild($gIBSMun);
+
+        // Valor total do IBS
+        $this->dom->addChild($gIBS, "vIBS", $vIBS, false, "Valor total do IBS");
+
+        // Créditos presumidos IBS
+        $this->dom->addChild($gIBS, "vCredPres", $vCredPresIBS, false, "Valor do crédito presumido IBS");
+        $this->dom->addChild($gIBS, "vCredPresCondSus", $vCredPresCondSusIBS, false, "Valor do crédito presumido condição suspensiva IBS");
+
+        $IBSCBSTot->appendChild($gIBS);
+
+        // Grupo gCBS (CBS Federal)
+        $gCBS = $this->dom->createElement("gCBS");
+        $this->dom->addChild($gCBS, "vDif", $vDifCBS, false, "Valor diferido CBS");
+        $this->dom->addChild($gCBS, "vDevTrib", $vDevTribCBS, false, "Valor da devolução de tributo CBS");
+        $this->dom->addChild($gCBS, "vCBS", $vCBS, false, "Valor da CBS");
+        $this->dom->addChild($gCBS, "vCredPres", $vCredPresCBS, false, "Valor do crédito presumido CBS");
+        $this->dom->addChild($gCBS, "vCredPresCondSus", $vCredPresCondSusCBS, false, "Valor do crédito presumido condição suspensiva CBS");
+
+        $IBSCBSTot->appendChild($gCBS);
+
+        $this->dom->appChild($this->total, $IBSCBSTot, '');
+        return $IBSCBSTot;
     }
 
     /**
@@ -4218,6 +4477,10 @@ class MakeNFe extends BaseMake
             }
             if (!empty($this->aICMSUFDest[$nItem])) {
                 $this->dom->appChild($imposto, $this->aICMSUFDest[$nItem], "Inclusão do node ICMSUFDest");
+            }
+            // Reforma Tributária - IBS/CBS
+            if (!empty($this->aIBSCBS[$nItem])) {
+                $this->dom->appChild($imposto, $this->aIBSCBS[$nItem], "Inclusão do node IBSCBS");
             }
             $this->aImposto[$nItem] = $imposto;
         }
